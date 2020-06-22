@@ -8,9 +8,11 @@ import {
 } from 'react-native';
 import io from 'socket.io-client';
 import { GiftedChat } from 'react-native-gifted-chat';
+import JoinScreen from './JoinScreen';
 
 export default function HomeScreen() {
   const [recvMessages, setRecvMessages] = useState([]);
+  const [hasJoined, setHasJoined] = useState(false);
   const socket = useRef(null);
   useEffect(() => {
     socket.current = io('http://192.168.1.5:3001');
@@ -24,15 +26,22 @@ export default function HomeScreen() {
     setRecvMessages((prevState) => GiftedChat.append(prevState, messages));
   };
 
+  const joinChat = (username) => {
+    socket.current.emit('join', username);
+    setHasJoined(true);
+  };
+
   return (
     <View style={{ flex: 1 }}>
       <GiftedChat
+        renderUsernameOnMessage
         messages={recvMessages}
         onSend={(messages) => onSend(messages)}
         user={{
           _id: 1,
         }}
       />
+
       {Platform.OS === 'android' && <KeyboardAvoidingView behavior="padding" />}
     </View>
   );
